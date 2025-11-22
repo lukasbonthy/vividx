@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room - Vividx</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        .bg-dark-800 {
+            background-color: transparent;
+        }
+        .text-highlight {
+            color: #e2e8f0;
+        }
+        .rounded-custom {
+            border-radius: 12px;
+        }
+        .shadow-custom {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+        .chat-container {
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            width: 600px;
+            background-color: #1e1e2e;
+            padding: 10px;
+            margin-left: 20px;
+            height: 250px; /* Fixed height */
+        }
+        .chat-header {
+            font-size: 18px;
+            font-weight: bold;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #444;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .chat-message img {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .chat-message-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-message-username {
+            font-weight: bold;
+        }
+        .chat-message-text {
+            margin-top: 2px;
+        }
+        .chat-input-container {
+            display: flex;
+        }
+        .chat-input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            margin-right: 10px;
+        }
+        .chat-send-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #46459b;
+            color: white;
+            cursor: pointer;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        .logo-container {
+            margin-right: 20px;
+        }
+        .logo-container img {
+            height: 50px;
+            cursor: pointer;
+        }
+        .room-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .room-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e2e8f0;
+        }
+        .movie-title {
+            font-size: 18px;
+            color: #e2e8f0;
+        }
+        .share-button {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            background-color: #46459b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .share-button i {
+            margin-right: 5px;
+        }
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1040;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .hidden {
+            display: none;
+        }
+        .username-modal {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #fff;
+        }
+    </style>
+    <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <a href="index.html">
+                <img src="https://cdn.glitch.global/24f49b4e-329b-4fd9-b96c-eb72e8d96829/DALL_E_2024-05-23_17.55.01_-_9_different_logos_for_a_YouTube_channel_named__vivid___featuring_the_letter__V___with_a_vibrant__fairly_simple_and_minimalistic_design__using_a_purple-removebg-preview.png" alt="Vividx Logo">
+            </a>
+        </div>
+        <div class="room-info">
+            <div id="roomNameHeader" class="room-name"></div>
+            <div id="movieTitleHeader" class="movie-title"></div>
+        </div>
+        <div class="share-button" onclick="shareRoom()">
+            <i class="fas fa-share"></i> Share
+        </div>
+    </header>
+    <div class="container flex">
+        <div class="video-container rounded-lg overflow-hidden flex-grow">
+            <div id="videoPlayer" class="w-full rounded-custom" style="height: 400px;"></div>
+        </div>
+        <div class="chat-container">
+            <div class="chat-header">Chat</div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Type a message..." maxlength="200">
+                <button class="chat-send-button" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="usernameModal" class="modal-backdrop hidden">
+        <div class="username-modal">
+            <h2>Please set your username</h2>
+            <input type="text" id="usernameInput" placeholder="Enter username" class="text-black w-64 p-2 rounded mb-4">
+            <button class="chat-send-button" onclick="setUsername()">Set Username</button>
+        </div>
+    </div>
+
+    <script src="sync.js"></script>
+    <script>
+        let player;
+        let videoUrl = '';
+        let videoId = '';
+        let isYouTube = false;
+        let lastSyncTime = 0;
+        const SYNC_INTERVAL = 5000; // Sync every 5 seconds
+        const SYNC_THRESHOLD = 1; // Allowable time difference in seconds
+        const ADJUSTMENT_RATE = 0.1; // Rate at which playback speed is adjusted
+
+        function getQueryParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const regex = /([^&=]+)=([^&]*)/g;
+            let m;
+            while (m = regex.exec(queryString)) {
+                params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+            }
+            return params;
+        }
+
+        function onYouTubeIframeAPIReady() {
+            if (isYouTube) {
+                player = new YT.Player('videoPlayer', {
+                    height: '390',
+                    width: '640',
+                    videoId: videoId,
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    },
+                    playerVars: {
+                        autoplay: 1
+                    }
+                });
+            }
+        }
+
+        function onPlayerReady(event) {
+            event.target.playVideo();
+            synchronizeVideo();
+            setInterval(synchronizeVideo, SYNC_INTERVAL);
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                synchronizeVideo();
+            }
+        }
+
+        function synchronizeVideo() {
+            fetch(`/time/${getQueryParams().code}`)
+                .then(response => response.json())
+                .then(data => {
+                    const serverTime = data.currentTime;
+                    const currentTime = isYouTube ? player.getCurrentTime() : document.querySelector('video').currentTime;
+                    const timeDifference = serverTime - currentTime;
+
+                    if (Math.abs(timeDifference) > SYNC_THRESHOLD) {
+                        if (isYouTube && player) {
+                            player.seekTo(serverTime, true);
+                        } else {
+                            const videoElement = document.querySelector('video');
+                            if (videoElement) {
+                                videoElement.currentTime = serverTime;
+                            }
+                        }
+                    } else {
+                        adjustPlaybackSpeed(timeDifference);
+                    }
+                });
+        }
+
+        function adjustPlaybackSpeed(timeDifference) {
+            const videoElement = document.querySelector('video');
+            if (isYouTube && player) {
+                player.setPlaybackRate(1 + (timeDifference * ADJUSTMENT_RATE));
+            } else if (videoElement) {
+                videoElement.playbackRate = 1 + (timeDifference * ADJUSTMENT_RATE);
+            }
+        }
+
+        function displayChatMessage({ username, profilePicture, message }) {
+            const chatMessages = document.getElementById('chatMessages');
+            const chatMessage = document.createElement('div');
+            chatMessage.className = 'chat-message';
+            chatMessage.innerHTML = `
+                <img src="${profilePicture}" alt="Profile Picture">
+                <div class="chat-message-content">
+                    <div class="chat-message-username">${username}</div>
+                    <div class="chat-message-text">${message}</div>
+                </div>
+            `;
+            chatMessages.appendChild(chatMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function loadChatMessages(chat) {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            chat.forEach(displayChatMessage);
+        }
+
+        function fetchChatMessages() {
+            const params = getQueryParams();
+            fetch(`/room-details/${params.code}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.chat) {
+                        loadChatMessages(data.chat);
+                    }
+                });
+        }
+
+        function extractYouTubeVideoId(url) {
+            const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9-_]{11})/;
+            const matches = url.match(regex);
+            return matches ? matches[1] : null;
+        }
+
+        function checkUsername() {
+            const username = localStorage.getItem('username');
+            if (!username) {
+                document.getElementById('usernameModal').classList.remove('hidden');
+            }
+        }
+
+        function setUsername() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username) {
+                localStorage.setItem('username', username);
+                document.getElementById('usernameModal').classList.add('hidden');
+            } else {
+                alert('Please enter a username.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUsername();
+            const params = getQueryParams();
+            fetch(`/room-details/${params.code}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.videoUrl) {
+                        videoUrl = data.videoUrl;
+                        videoId = extractYouTubeVideoId(videoUrl);
+                        isYouTube = !!videoId;
+                        document.getElementById('roomNameHeader').textContent = data.roomName;
+                        document.getElementById('movieTitleHeader').textContent = data.movieTitle;
+
+                        if (isYouTube) {
+                            // Initialize YouTube player
+                            onYouTubeIframeAPIReady();
+                        } else {
+                            const videoPlayer = document.getElementById('videoPlayer');
+                            videoPlayer.innerHTML = `<video controls preload="auto" width="720" class="w-full rounded-custom" autoplay>
+                                                        <source src="${videoUrl}" type="video/mp4">
+                                                        Your browser does not support the video tag.
+                                                    </video>`;
+                            const videoElement = document.querySelector('video');
+                            videoElement.addEventListener('play', function() {
+                                synchronizeVideo();
+                                setInterval(synchronizeVideo, SYNC_INTERVAL);
+                            });
+                            // Auto-play HTML5 video
+                            videoElement.play().catch(error => {
+                                console.error('Failed to play video:', error);
+                            });
+                        }
+
+                        loadChatMessages(data.chat);
+                        setInterval(fetchChatMessages, 5000); // Auto-refresh chat every 5 seconds
+                    } else {
+                        alert('No video URL found for this room.');
+                    }
+                });
+        });
+
+        function shareRoom() {
+            const params = getQueryParams();
+            const roomUrl = `https://vividx.glitch.me/room.html?code=${params.code}`;
+            navigator.clipboard.writeText(roomUrl).then(() => {
+                alert('Room link copied to clipboard!');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+
+        function sendMessage() {
+            const params = getQueryParams();
+            const username = localStorage.getItem('username');
+            const profilePicture = localStorage.getItem('profilePicture') || 'https://cdn.glitch.global/24f49b4e-329b-4fd9-b96c-eb72e8d96829/images.jpg';
+            const message = document.getElementById('chatInput').value.trim();
+            if (message) {
+                fetch(`/send-message/${params.code}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, profilePicture, message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displayChatMessage({ username, profilePicture, message });
+                        document.getElementById('chatInput').value = '';
+                    } else if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert('Failed to send message. Please try again.');
+                    }
+                }).catch(err => {
+                    console.error('Failed to send message:', err);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="title" content="VividX - Watch YouTube Videos in Sync with Friends">
+    <meta name="description" content="VividX lets you and your friends watch YouTube videos together in perfect sync. Enjoy seamless streaming, chat, and shared experiences online!">
+    <meta name="keywords" content="VividX, watch YouTube together, sync YouTube videos, watch videos with friends, group video watching, synchronized streaming, online video chat">
+    <meta name="author" content="Swifly Network">
+    <meta name="robots" content="index, follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vividx - Browse Rooms</title>
+    <link href="https://assets.lol/libs/fontawesome-6.2.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://cdn.glitch.global/24f49b4e-329b-4fd9-b96c-eb72e8d96829/DALL_E_2024-05-23_17.55.01_-_9_different_logos_for_a_YouTube_channel_named__vivid___featuring_the_letter__V___with_a_vibrant__fairly_simple_and_minimalistic_design__using_a_purple-removebg-preview.png">
+</head>
+<body>
+    <header class="header flex items-center justify-between w-full px-6 py-4">
+        <div class="logo-container flex items-center">
+            <img src="https://cdn.glitch.global/24f49b4e-329b-4fd9-b96c-eb72e8d96829/DALL_E_2024-05-23_17.55.01_-_9_different_logos_for_a_YouTube_channel_named__vivid___featuring_the_letter__V___with_a_vibrant__fairly_simple_and_minimalistic_design__using_a_purple-removebg-preview.png" alt="Vividx Logo" class="logo">
+            <span class="logo-text">ividX</span>
+        </div>
+        <div class="profile-buttons-container flex items-center">
+            <div class="profile-icon-container relative">
+                <img src="https://cdn.glitch.global/24f49b4e-329b-4fd9-b96c-eb72e8d96829/images.jpg" alt="Profile Icon" class="profile-icon" id="profileIcon">
+                <div class="profile-menu hidden" id="profileMenu">
+                    <div class="profile-menu-item" onclick="changeProfilePicture()">Profile picture</div>
+                    <div class="profile-menu-item" onclick="changeUsername()">Username</div>
+                </div>
+            </div>
+            <div class="buttons flex items-center ml-4">
+                <button class="button secondary" onclick="showJoinModal()">Join Code</button>
+                <button class="button secondary" onclick="createRoom()">Create</button>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <h2 class="text-2xl font-bold mb-4">Available Rooms</h2>
+        <div id="roomsList" class="rooms-list">
+            <!-- Rooms will be dynamically added here -->
+        </div>
+    </div>
+    <div id="joinModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeJoinModal()">&times;</span>
+            <input type="text" id="roomCode" placeholder="Type room code:" class="text-black w-full p-2 rounded mb-4">
+            <button class="button bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onclick="joinRoom()">Join Room</button>
+      </div>
+    </div>
+
+    <div id="profilePictureModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeProfilePictureModal()">&times;</span>
+            <input type="file" id="profilePictureInput" accept="image/*" class="w-full p-2 rounded mb-4">
+            <button class="button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" onclick="saveProfilePicture()">Save</button>
+        </div>
+    </div>
+
+    <div id="usernameModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="mb-4">Set Your Username</h2>
+            <input type="text" id="usernameInput" placeholder="Enter new username" class="text-black w-full p-2 rounded mb-4">
+            <button class="button bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" onclick="saveUsername()">Save</button>
+        </div>
+    </div>
+
+    <script>
+        function joinRoom() {
+            const roomCode = document.getElementById('roomCode').value.trim();
+            if (roomCode) {
+                window.location.href = `room.html?code=${roomCode}`;
+            } else {
+                alert("Please enter a room code.");
+            }
+        }
+
+        function createRoom() {
+            const username = localStorage.getItem('username');
+            if (username) {
+                window.location.href = `create-room.html?username=${username}`;
+            } else {
+                alert("Please set a username first.");
+            }
+        }
+
+        function fetchRooms() {
+            fetch('/rooms')
+                .then(response => response.json())
+                .then(data => {
+                    const roomsList = document.getElementById('roomsList');
+                    roomsList.innerHTML = '';
+                    data.forEach(room => {
+                        const roomBox = document.createElement('div');
+                        roomBox.className = 'room-box';
+                        roomBox.innerHTML = `
+                            <h3 class="text-xl font-bold">${room.roomName}</h3>
+                            <p class="text-md">${room.movieTitle}</p>
+                            <p class="text-sm">Room Code: ${room.code}</p>
+                        `;
+                        roomBox.onclick = () => {
+                            window.location.href = `room.html?code=${room.code}`;
+                        };
+                        roomsList.appendChild(roomBox);
+                    });
+                });
+        }
+
+        function showJoinModal() {
+            document.getElementById('joinModal').classList.remove('hidden');
+        }
+
+        function closeJoinModal() {
+            document.getElementById('joinModal').classList.add('hidden');
+        }
+
+        function changeProfilePicture() {
+            document.getElementById('profilePictureModal').classList.remove('hidden');
+        }
+
+        function closeProfilePictureModal() {
+            document.getElementById('profilePictureModal').classList.add('hidden');
+        }
+
+        function saveProfilePicture() {
+            const fileInput = document.getElementById('profilePictureInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileIcon').src = e.target.result;
+                    localStorage.setItem('profilePicture', e.target.result);
+                    closeProfilePictureModal();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function changeUsername() {
+            document.getElementById('usernameModal').classList.remove('hidden');
+        }
+
+        function closeUsernameModal() {
+            document.getElementById('usernameModal').classList.add('hidden');
+        }
+
+        function saveUsername() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username) {
+                localStorage.setItem('username', username);
+                document.getElementById('usernameModal').classList.add('hidden');
+                fetchRooms(); // Load rooms once username is set
+            } else {
+                alert('Please enter a valid username.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedProfilePicture = localStorage.getItem('profilePicture');
+            if (savedProfilePicture) {
+                document.getElementById('profileIcon').src = savedProfilePicture;
+            }
+
+            const savedUsername = localStorage.getItem('username');
+            if (!savedUsername) {
+                document.getElementById('usernameModal').classList.remove('hidden');
+            } else {
+                fetchRooms();
+            }
+        });
+
+        document.getElementById('profileIcon').addEventListener('mouseover', function() {
+            document.getElementById('profileMenu').classList.remove('hidden');
+        });
+
+        document.getElementById('profileIcon').addEventListener('mouseleave', function() {
+            document.getElementById('profileMenu').classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

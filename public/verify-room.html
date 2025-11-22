@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Room - Vividx</title>
+    <link href="https://assets.lol/libs/fontawesome-6.2.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="header">
+        <h1 class="text-4xl font-bold mb-8">Verify Room Creation</h1>
+    </div>
+    <div class="container">
+        <p id="status">Verifying...</p>
+    </div>
+    <div class="footer">
+        <p>&copy; 2023 Vividx</p>
+    </div>
+
+    <script>
+        function getQueryParams() {
+            const params = {};
+            const queryString = window.location.search.substring(1);
+            const regex = /([^&=]+)=([^&]*)/g;
+            let m;
+            while (m = regex.exec(queryString)) {
+                params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+            }
+            return params;
+        }
+
+        function verifyRoom() {
+            const params = getQueryParams();
+            fetch(`/set-url/${params.code}?url=${encodeURIComponent(params.url)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = `room.html?code=${params.code}`;
+                    } else {
+                        document.getElementById('status').textContent = 'Failed to verify room. Please try again.';
+                    }
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', verifyRoom);
+    </script>
+</body>
+</html>

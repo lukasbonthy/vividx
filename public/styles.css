@@ -1,0 +1,286 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+body {
+    color: #fff;
+    background-color: #0a0a12;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #46459b;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #32316d;
+}
+
+::-webkit-scrollbar-track {
+    background: #0a0a12;
+    border-radius: 5px;
+}
+
+.header {
+    background: transparent;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 50px;
+    margin-right: 10px;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #fff, #ccc, #fff);
+    background-size: 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s infinite linear;
+}
+
+@keyframes shine {
+    0% {
+        background-position: 0%;
+    }
+    100% {
+        background-position: 200%;
+    }
+}
+
+.profile-buttons-container {
+    display: flex;
+    align-items: center;
+}
+
+.buttons .button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    background-color: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin: 0 7px;
+}
+
+.buttons .button:hover {
+    background-color: #46459b;
+    transform: scale(1.05);
+}
+
+.button {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    background-color: #46459b;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    margin: 10px;
+}
+
+.button:hover {
+    background-color: #666;
+    transform: scale(1.05);
+}
+
+.button.secondary {
+    color: #fff;
+    background-color: #ffffff4d;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: fadeIn 1s ease;
+    margin-top: 100px;
+    width: 80%;
+}
+
+.rooms-section {
+    width: 100%;
+}
+
+.rooms-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.room-box {
+    background-color: #1e1e2e;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.room-box:hover {
+    background-color: #46459b;
+    transform: scale(1.05);
+}
+
+.room-box .room-details {
+    margin-top: 10px;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: #111;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    animation: fadeIn 1s ease;
+}
+
+.footer p {
+    color: #bbb;
+    font-size: 14px;
+}
+
+.modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #1e1e2e;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #fff;
+}
+
+input[type="text"], input[type="file"] {
+    width: 300px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="file"]:focus {
+    border-color: #46459b;
+    box-shadow: 0 0 10px #46459b;
+}
+
+.profile-icon-container {
+    position: relative;
+    margin-left: 10px;
+}
+
+.profile-icon {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.profile-icon:hover {
+    transform: scale(1.1);
+}
+
+.profile-menu {
+    position: absolute;
+    top: 20px;
+    right: 0;
+    background-color: #1e1e2e;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s;
+}
+
+.profile-icon-container:hover .profile-menu {
+    visibility: visible;
+    opacity: 1;
+}
+
+.profile-menu-item {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.profile-menu-item:hover {
+    border-radius: 5px;
+    background-color: #46459b;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
